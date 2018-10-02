@@ -412,7 +412,9 @@ func (s *shardContextImpl) getDefaultEncoding(domainID string) (common.EncodingT
 	if err != nil {
 		return "", err
 	}
-	return common.EncodingType(s.config.EventEncodingType(dm.GetInfo().Name)), nil
+	ec := s.config.EventEncodingType(dm.GetInfo().Name)
+	s.logger.WithField("encodingTypeDebug", ec).Info("debuging encoding for Flipr")
+	return common.EncodingType(ec), nil
 }
 
 func (s *shardContextImpl) UpdateWorkflowExecution(request *persistence.UpdateWorkflowExecutionRequest) (*persistence.UpdateWorkflowExecutionResponse, error) {

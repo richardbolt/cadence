@@ -1233,12 +1233,28 @@ func (s *stateBuilderSuite) TestApplyEvents_EventTypeDecisionTaskTimedOut() {
 		},
 	}
 	s.mockMutableState.On("ReplicateDecisionTaskTimedOutEvent", scheduleID, startedID).Once()
+	tasklist := "some random tasklist"
+	newScheduleID := int64(233)
+	executionInfo := &persistence.WorkflowExecutionInfo{
+		TaskList: tasklist,
+	}
+	s.mockMutableState.On("GetExecutionInfo").Return(executionInfo)
+	s.mockMutableState.On("ReplicateTransientDecisionTaskScheduled").Return(&decisionInfo{
+		Version:    version,
+		ScheduleID: newScheduleID,
+		TaskList:   tasklist,
+	})
 	s.mockUpdateVersion(event)
 
 	s.stateBuilder.applyEvents(domainID, requestID, execution, s.toHistory(event), nil)
 
+	s.Equal([]persistence.Task{&persistence.DecisionTask{
+		DomainID:   domainID,
+		TaskList:   tasklist,
+		ScheduleID: newScheduleID,
+	}}, s.stateBuilder.transferTasks)
+
 	s.Empty(s.stateBuilder.timerTasks)
-	s.Empty(s.stateBuilder.transferTasks)
 	s.Empty(s.stateBuilder.newRunTimerTasks)
 	s.Empty(s.stateBuilder.newRunTransferTasks)
 }
@@ -1376,12 +1392,28 @@ func (s *stateBuilderSuite) TestApplyEvents_EventTypeDecisionTaskFailed() {
 		},
 	}
 	s.mockMutableState.On("ReplicateDecisionTaskFailedEvent", scheduleID, startedID).Once()
+	tasklist := "some random tasklist"
+	newScheduleID := int64(233)
+	executionInfo := &persistence.WorkflowExecutionInfo{
+		TaskList: tasklist,
+	}
+	s.mockMutableState.On("GetExecutionInfo").Return(executionInfo)
+	s.mockMutableState.On("ReplicateTransientDecisionTaskScheduled").Return(&decisionInfo{
+		Version:    version,
+		ScheduleID: newScheduleID,
+		TaskList:   tasklist,
+	})
 	s.mockUpdateVersion(event)
 
 	s.stateBuilder.applyEvents(domainID, requestID, execution, s.toHistory(event), nil)
 
+	s.Equal([]persistence.Task{&persistence.DecisionTask{
+		DomainID:   domainID,
+		TaskList:   tasklist,
+		ScheduleID: newScheduleID,
+	}}, s.stateBuilder.transferTasks)
+
 	s.Empty(s.stateBuilder.timerTasks)
-	s.Empty(s.stateBuilder.transferTasks)
 	s.Empty(s.stateBuilder.newRunTimerTasks)
 	s.Empty(s.stateBuilder.newRunTransferTasks)
 }

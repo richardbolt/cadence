@@ -140,10 +140,32 @@ func (b *stateBuilderImpl) applyEvents(domainID, requestID string, execution sha
 			b.msBuilder.ReplicateDecisionTaskTimedOutEvent(attributes.GetScheduledEventId(),
 				attributes.GetStartedEventId())
 
+			// this is for transient decision
+			di := b.msBuilder.ReplicateTransientDecisionTaskScheduled()
+			if di == nil {
+				return nil, nil, nil, &shared.InternalServiceError{Message: "Failed to add transient decision scheduled event."}
+			}
+			b.transferTasks = append(b.transferTasks, b.scheduleDecisionTransferTask(domainID, b.getTaskList(b.msBuilder),
+				di.ScheduleID))
+			// since we do not use stickyness on the standby side, there shall be no decision schedule to start timeout
+
+			lastDecision = di
+
 		case shared.EventTypeDecisionTaskFailed:
 			attributes := event.DecisionTaskFailedEventAttributes
 			b.msBuilder.ReplicateDecisionTaskFailedEvent(attributes.GetScheduledEventId(),
 				attributes.GetStartedEventId())
+
+			// this is for transient decision
+			di := b.msBuilder.ReplicateTransientDecisionTaskScheduled()
+			if di == nil {
+				return nil, nil, nil, &shared.InternalServiceError{Message: "Failed to add transient decision scheduled event."}
+			}
+			b.transferTasks = append(b.transferTasks, b.scheduleDecisionTransferTask(domainID, b.getTaskList(b.msBuilder),
+				di.ScheduleID))
+			// since we do not use stickyness on the standby side, there shall be no decision schedule to start timeout
+
+			lastDecision = di
 
 		case shared.EventTypeActivityTaskScheduled:
 			ai := b.msBuilder.ReplicateActivityTaskScheduledEvent(event)

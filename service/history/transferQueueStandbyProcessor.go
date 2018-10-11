@@ -206,7 +206,7 @@ func (t *transferQueueStandbyProcessorImpl) processDecisionTask(transferTask *pe
 		wfTypeName := executionInfo.WorkflowTypeName
 		startTimestamp := executionInfo.StartTimestamp
 
-		markWorkflowAsOpen := transferTask.ScheduleID <= common.FirstEventID+2 && msBuilder.IsWorkflowExecutionRunning()
+		markWorkflowAsOpen := transferTask.ScheduleID <= common.FirstEventID+2
 
 		if !isPending {
 			if markWorkflowAsOpen {

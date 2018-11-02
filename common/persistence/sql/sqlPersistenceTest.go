@@ -124,7 +124,7 @@ func (s *TestCluster) CreateSession() {
 
 // CreateDatabase from PersistenceTestCluster interface
 func (s *TestCluster) CreateDatabase() {
-	err := createDatabase(s.cfg.DriverName, s.cfg.ConnectAddr, testUser, testPassword, s.dbName, true)
+	err := createDatabase(s.cfg.DriverName, s.cfg.ConnectAddr, testUser, testPassword, s.dbName, "", true)
 	if err != nil {
 		log.Fatal(err)
 	}

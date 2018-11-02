@@ -33,8 +33,11 @@ import (
 const defaultDriverName = "mysql"
 
 func newConnection(cfg config.SQL) (*sqlx.DB, error) {
-	var db, err = sqlx.Connect(cfg.DriverName,
-		fmt.Sprintf(dataSourceName, cfg.User, cfg.Password, cfg.ConnectProtocol, cfg.ConnectAddr, cfg.DatabaseName))
+	connStr := fmt.Sprintf(dataSourceName, cfg.User, cfg.Password, cfg.ConnectProtocol, cfg.ConnectAddr, cfg.DatabaseName)
+	if cfg.ConnectParams != "" {
+		connStr += "&" + cfg.ConnectParams
+	}
+	var db, err = sqlx.Connect(cfg.DriverName, connStr)
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +46,12 @@ func newConnection(cfg config.SQL) (*sqlx.DB, error) {
 	return db, nil
 }
 
-func createDatabase(driver string, addr string, username, password, dbName string, overwrite bool) error {
-	var db, err = sqlx.Connect(driver, fmt.Sprintf(dataSourceName, username, password, "tcp", addr, ""))
+func createDatabase(driver string, addr string, username, password, dbName, params string, overwrite bool) error {
+	connStr := fmt.Sprintf(dataSourceName, username, password, "tcp", addr, "")
+	if params != "" {
+		connStr += "&" + params
+	}
+	var db, err = sqlx.Connect(driver, connStr)
 	if err != nil {
 		return fmt.Errorf("failure connecting to mysql database: %v", err)
 	}

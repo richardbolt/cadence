@@ -149,7 +149,9 @@ type (
 		// ConnectAddr is the remote addr of the database
 		ConnectAddr string `yaml:"connectAddr" validate:"nonzero"`
 		// ConnectProtocol is the protocol that goes with the ConnectAddr ex - tcp, unix
-		ConnectProtocol string `yaml:"connectProtocol validate:"nonzero""`
+		ConnectProtocol string `yaml:"connectProtocol" validate:"nonzero"`
+		// ConnectParams are optional extra connection parameters for the connection query string ex - tls=true&readTimeout=30s
+		ConnectParams string `yaml:"connectParams"`
 		// MaxQPS the max request rate on this datastore
 		MaxQPS int `yaml:"maxQPS"`
 		// MaxConns the max number of connections to this datastore
